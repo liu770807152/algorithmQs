@@ -37,38 +37,43 @@ class Node {
 }
 
 function serialize(root) {
-    if (root === null || root) {
+    if (!root) {
         return "#";
     }
-    return str(root.val)+serialize(root.left)+serialize(root.right);
+    return String(root.val)+','+serialize(root.left)+','+serialize(root.right);
 }
 
 function deserialize(data) {
-    function helper(vals) {
-        let val = vals.next();
+    function helper(values) {
+        const val = values.next().value;
         if (val === "#") {
             return null;
         }
-        let node = new Node(val);
-        node.left = helper();
-        node.right = helper();
+        const node = new Node(val);
+        node.left = helper(values);
+        node.right = helper(values);
         return node;
     }
     function* nodeIterator(start = 0, end = Infinity, step = 1) {
-        for (let i = data[start]; i < end; i += step) {
-            let cur = i === 0 ? "" : cur;
-            if (cur !== ',') {
-                cur += data[start];
-                continue;
+        let values = [];
+        let cur = "";
+        for (let i = start; i < end; i += step) {
+            if (data[i] !== ',') {
+                cur += data[i];
+                if (i === end - 1) {
+                    values.push(cur);
+                }
             } else {
-                let result = cur;
+                values.push(cur);
                 cur = "";
-                yield result;
             }
         }
+        for (let v of values) {
+            yield v;
+        }
     }
-    let vals = nodeIterator(0, data.length, 1);
-    return helper(vals);
+    const values = nodeIterator(0, data.length, 1);
+    return helper(values);
 }
 
 let node = new Node("root", new Node("left", new Node("left.left")), new Node("right"));
